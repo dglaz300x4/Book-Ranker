@@ -154,6 +154,10 @@ class Library {
 
             books.pop_back();
         }
+
+        void editBook(int index, Book updateBook) { // Edit a book given its index
+            this->books[index] = updateBook;
+        }
 };
 
 class Menus {
@@ -179,52 +183,22 @@ class Menus {
             std::cout << bookInfo.getDescription() << '\n';
             std::cout << "Publisher: " << bookInfo.getPublisher() << '\t' << bookInfo.getReleaseDate() << '\n';
         }
-    public:
-        void mainMenu(){ // Display Main menu
-            system("clear");
+
+        void displayBookInfoList(std::vector<Book> saved, int bookCount){
             std::cout << "=============================\n";
-            std::cout << "WELCOME TO YOUR LOCAL LIBRARY\n  1. VIEW YOUR BOOKS\n  2. ADD A NEW BOOK\n  0. EXIT\n";
-            std::cout << "=============================\n";
-        }
-
-        void viewBooks(){ // View all books
-            int selection = -1;
-            int bookCount = this->savedLibrary.getBookCount();
-            std::vector<Book> saved = this->savedLibrary.getBooksVector();
-
-
-            while (selection != 0) {
-                system("clear");
-                std::cout << "SELECT A BOOK TO VIEW MORE (OR 0 TO EXIT)\n";
-                std::cout << "=============================\n";
-                for (int i = 0; i < bookCount; ++i) {
-                    std::cout << i+1 << ' ' <<  saved[i].getTitle() << " Rating: " << this->ratingScore(saved[i].getRating()) << "\n   " << saved[i].getAuthor() << '\n';
-                }
-                std::cout << "=============================\n";
-                std::cin >> selection;
-
-                if (selection != 0 && selection <= bookCount) {
-                    system("clear");
-                    std::cout << "=============================\n";
-                    this->displayBookInfo(saved[selection-1]);
-                    std::cout << "=============================\n";
-
-                    std::cout << "(PRESS ENTER TO CONTINUE)";
-                    std::cin.ignore();
-                    std::cin.get();
-                }
-
+            for (int i = 0; i < bookCount; ++i) {
+                std::cout << i+1 << ' ' <<  saved[i].getTitle() << " Rating: " << this->ratingScore(saved[i].getRating()) << "\n   " << saved[i].getAuthor() << '\n';
             }
+            std::cout << "=============================\n";
         }
 
-        void addNewBook(){ // Adds a new book to the library
-            Book newBook;
+        Book editBookInfo(Book displayedBook){
+            Book newBook = displayedBook;
 
             int selection = -1;
-
-            std::string inputString;
             int newRating;
 
+            std::string inputString;
 
             while (selection != 9) {
                 system("clear");
@@ -240,7 +214,8 @@ class Menus {
                 std::cout << "8 SAVE & EXIT\n";
                 std::cout << "9 EXIT\n";
                 std::cout << "=============================\n";
-                std::cout << "SELECT AN ITEM TO CHANGE IT (TITLE AND AUTHOR MUST NOT BE N/A): "; selection = getMenuInput();
+                std::cout << "SELECT AN ITEM TO CHANGE IT (TITLE AND AUTHOR MUST NOT BE N/A): ";
+                selection = getMenuInput();
                 std::cout << '\n';
 
                 switch (selection) {
@@ -286,10 +261,10 @@ class Menus {
                         break;
                     case 8:
 
-                        if (newBook.getTitle() != "N/A" & newBook.getAuthor() != "N/A"){
-                            this->savedLibrary.addBook(newBook);
+                        if ((newBook.getTitle() != "N/A" || newBook.getTitle() != "") && (newBook.getAuthor() != "N/A" || newBook.getAuthor() != "")){
                             std::cout << "SAVING " << newBook.getTitle() << " (PRESS ENTER TO CONTINUE)";
                             selection = 9; // Changes selection to 9 to exit loop
+                            displayedBook = newBook;
                         }
                         else {
                             std::cout << "YOUR TITLE OR AUTHOR IS INVALID (PRESS ENTER TO CONTINUE)";
@@ -306,31 +281,90 @@ class Menus {
                         break;
                 }
             }
+
+            return displayedBook;
         }
+
+    public:
+
+        void mainMenu(){ // Display Main menu
+            system("clear");
+            std::cout << "=============================\n";
+            std::cout << "WELCOME TO YOUR LOCAL LIBRARY\n  1. VIEW YOUR BOOKS\n  2. ADD A NEW BOOK\n  3. EDIT AN EXISTING BOOK\n  0. EXIT\n";
+            std::cout << "=============================\n";
+        }
+
+        void viewBooksMenu(){ // View all books
+            int selection = -1;
+            int bookCount = this->savedLibrary.getBookCount();
+            std::vector<Book> saved = this->savedLibrary.getBooksVector();
+
+            while (selection != 0) {
+                system("clear");
+                std::cout << "SELECT A BOOK TO VIEW MORE (OR 0 TO EXIT)\n";
+                displayBookInfoList(saved, bookCount);
+                std::cin >> selection;
+
+                if (selection != 0 && selection <= bookCount) {
+                    system("clear");
+                    std::cout << "=============================\n";
+                    this->displayBookInfo(saved[selection-1]);
+                    std::cout << "=============================\n";
+
+                    std::cout << "(PRESS ENTER TO CONTINUE)";
+                    std::cin.ignore();
+                    std::cin.get();
+                }
+
+            }
+        }
+
+        void editBookMenu(){
+            Book updateBook;
+
+            int selection = -1;
+            std::vector<Book> saved = this->savedLibrary.getBooksVector();
+            int bookCount = this->savedLibrary.getBookCount();
+
+            displayBookInfoList(saved, bookCount);
+
+            std::cout << "SELECT THE BOOK YOU WISH TO EDIT: "; std::cin >> selection;
+
+            if ()
+
+            editBookInfo(updateBook);
+        }
+
+        void addNewBook(){ // Adds a new book to the library
+            Book newBook;
+
+            newBook = editBookInfo(newBook);
+
+            this->savedLibrary.addBook(newBook);
+        };
 };
-
-
 
 
 int main(){
     Menus display;
     int selection = -1;
 
-    system("clear");
-    display.mainMenu();
-
     while(selection != 0) {
+        system("clear");
+        display.mainMenu();
         selection = getMenuInput();
         system("clear");
         switch (selection) {
             case 1:
-                display.viewBooks();
+                display.viewBooksMenu();
                 break;
             case 2:
                 display.addNewBook();
                 break;
+            case 3:
+                display.editBookMenu();
+                break;
         }
-        display.mainMenu();
     }
 
     return 0;
